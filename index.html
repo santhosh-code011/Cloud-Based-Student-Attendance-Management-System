@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Next-generation Cloud-Based Student Attendance Management System. Track real-time attendance, visualize analytics, manage student rosters, and generate academic compliance reports.">
+  <meta name="keywords" content="attendance management, cloud attendance, student tracking, attendance analytics, student defaulter alert">
+  <meta name="author" content="CloudAttend Engineering">
+  <title>Cloud-Based Student Attendance Management System | CloudAttend Pro</title>
+
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Chart.js for real-time visual analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Project Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-dark">
+  <div id="app" class="app-layout">
+    
+    <!-- Top Global App Bar -->
+    <header class="app-header">
+      <div class="header-left">
+        <button id="sidebarToggleBtn" class="icon-btn mobile-only-btn" aria-label="Toggle navigation menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+        <div class="brand-container">
+          <div class="brand-logo-glow">
+            <svg class="brand-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
+              <polyline points="13 11 11 13 14 16"></polyline>
+            </svg>
+          </div>
+          <div>
+            <span class="brand-title">CloudAttend<span class="brand-badge">PRO CLOUD</span></span>
+            <span class="brand-sub">Student Attendance Intelligence</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cloud Sync & Status Actions -->
+      <div class="header-right">
+        <div class="cloud-status-pill" id="cloudStatusIndicator" title="Click to trigger cloud synchronization">
+          <span class="pulse-dot"></span>
+          <span id="cloudStatusText">Cloud Synced</span>
+          <span class="cloud-region-chip" id="cloudRegionChip">AWS-EAST</span>
+        </div>
+
+        <button id="quickSyncBtn" class="action-btn secondary-btn" title="Synchronize state with cloud">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          <span>Sync</span>
+        </button>
+
+        <button id="themeToggleBtn" class="icon-btn" aria-label="Toggle theme mode" title="Toggle Dark/Light Mode">
+          <span id="themeIcon">🌙</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="app-body">
+      <!-- Collapsible Sleek Navigation Sidebar -->
+      <aside class="app-sidebar" id="appSidebar">
+        <div class="nav-section-title">MAIN WORKSPACE</div>
+        <nav class="nav-menu">
+          <button class="nav-item active" data-tab="tab-dashboard" id="navDashboard">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+            <span>Live Dashboard</span>
+          </button>
+
+          <button class="nav-item" data-tab="tab-mark" id="navMarkAttendance">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+            <span>Mark Attendance</span>
+            <span class="nav-badge highlight">LIVE</span>
+          </button>
+
+          <button class="nav-item" data-tab="tab-students" id="navStudents">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <span>Student Directory</span>
+            <span class="nav-badge count" id="sidebarStudentCount">10</span>
+          </button>
+
+          <button class="nav-item" data-tab="tab-reports" id="navReports">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            <span>Analytics & Reports</span>
+          </button>
+
+          <button class="nav-item" data-tab="tab-leaves" id="navLeaves">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            <span>Leave Requests</span>
+            <span class="nav-badge warning" id="sidebarPendingLeaves">1</span>
+          </button>
+
+          <button class="nav-item" data-tab="tab-settings" id="navSettings">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <span>Cloud & Settings</span>
+          </button>
+        </nav>
+
+        <!-- Current Academic Institution Box -->
+        <div class="sidebar-footer-card">
+          <div class="institution-meta">
+            <span class="institution-tag">INSTITUTION</span>
+            <strong id="sidebarInstName">CloudTech Institute</strong>
+            <small id="sidebarInstYear">AY 2026-2027 • Cloud Node 01</small>
+          </div>
+          <div class="server-status-row">
+            <span class="mini-status-led"></span>
+            <span id="backendPingText">REST API Online (3000)</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content Container with Tabs -->
+      <main class="app-main">
+
+        <!-- ========================================== -->
+        <!-- TAB 1: LIVE DASHBOARD -->
+        <!-- ========================================== -->
+        <section id="tab-dashboard" class="tab-panel active">
+          <div class="dashboard-banner">
+            <div>
+              <h1 class="page-title">Executive Attendance Dashboard</h1>
+              <p class="page-subtitle">Real-time attendance insights, cloud telemetry, and academic compliance metrics.</p>
+            </div>
+            <div class="banner-actions">
+              <button class="primary-btn pulse-glow" onclick="App.navigateTab('tab-mark')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>Take Attendance Now</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI Metric Cards Grid -->
+          <div class="kpi-grid">
+            <div class="kpi-card card-glow-emerald">
+              <div class="kpi-icon-wrapper emerald">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              </div>
+              <div class="kpi-details">
+                <span class="kpi-label">Average Attendance</span>
+                <div class="kpi-value-row">
+                  <span class="kpi-number" id="kpiAvgAttendance">87.5%</span>
+                  <span class="kpi-tag success">Healthy</span>
+                </div>
+                <span class="kpi-footnote">Above university benchmark (75%)</span>
+              </div>
+            </div>
+
+            <div class="kpi-card card-glow-cyan">
+              <div class="kpi-icon-wrapper cyan">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+              </div>
+              <div class="kpi-details">
+                <span class="kpi-label">Enrolled Students</span>
+                <div class="kpi-value-row">
+                  <span class="kpi-number" id="kpiTotalStudents">10</span>
+                  <span class="kpi-tag neutral">Active Roster</span>
+                </div>
+                <span class="kpi-footnote">Across 3 core engineering depts</span>
+              </div>
+            </div>
+
+            <div class="kpi-card card-glow-amber">
+              <div class="kpi-icon-wrapper amber">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              </div>
+              <div class="kpi-details">
+                <span class="kpi-label">Classes Logged</span>
+                <div class="kpi-value-row">
+                  <span class="kpi-number" id="kpiTotalSessions">5</span>
+                  <span class="kpi-tag info">Cloud Stored</span>
+                </div>
+                <span class="kpi-footnote">Verified session audit trails</span>
+              </div>
+            </div>
+
+            <div class="kpi-card card-glow-rose">
+              <div class="kpi-icon-wrapper rose">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              </div>
+              <div class="kpi-details">
+                <span class="kpi-label">Defaulters Alert</span>
+                <div class="kpi-value-row">
+                  <span class="kpi-number" id="kpiDefaultersCount">1</span>
+                  <span class="kpi-tag danger">&lt; 75% Shortage</span>
+                </div>
+                <span class="kpi-footnote">Requires academic advisor notice</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Row -->
+          <div class="dashboard-charts-grid">
+            <div class="glass-card chart-container">
+              <div class="card-header-flex">
+                <div>
+                  <h3 class="card-title">Daily Attendance Trend (%)</h3>
+                  <p class="card-desc">7-Day institutional attendance percentage trajectory</p>
+                </div>
+                <span class="chip-badge">Live Metric</span>
+              </div>
+              <div class="canvas-wrapper">
+                <canvas id="chartAttendanceTrend"></canvas>
+              </div>
+            </div>
+
+            <div class="glass-card chart-container">
+              <div class="card-header-flex">
+                <div>
+                  <h3 class="card-title">Overall Status Distribution</h3>
+                  <p class="card-desc">Present vs Absent vs Late vs Excused</p>
+                </div>
+                <span class="chip-badge">Aggregated</span>
+              </div>
+              <div class="canvas-wrapper doughnut-wrapper">
+                <canvas id="chartDistribution"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Sessions & Defaulters Watchlist -->
+          <div class="dashboard-split-grid">
+            <!-- Recent Attendance Sessions -->
+            <div class="glass-card">
+              <div class="card-header-flex">
+                <div>
+                  <h3 class="card-title">Recent Class Sessions</h3>
+                  <p class="card-desc">Most recently synchronized attendance sessions</p>
+                </div>
+                <button class="ghost-btn" onclick="App.navigateTab('tab-reports')">View All →</button>
+              </div>
+              <div class="table-responsive">
+                <table class="styled-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Subject / Course</th>
+                      <th>Dept & Sem</th>
+                      <th>Attendance Rate</th>
+                      <th>Faculty</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashboardRecentSessionsBody">
+                    <!-- Injected dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Defaulter Watchlist -->
+            <div class="glass-card">
+              <div class="card-header-flex">
+                <div>
+                  <h3 class="card-title">At-Risk Defaulter Watchlist</h3>
+                  <p class="card-desc">Students with attendance percentage below 75%</p>
+                </div>
+                <button class="ghost-btn" onclick="App.navigateTab('tab-students')">Manage Students →</button>
+              </div>
+              <div id="defaulterWatchlistContainer" class="defaulter-list">
+                <!-- Injected dynamically -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: MARK ATTENDANCE -->
+        <!-- ========================================== -->
+        <section id="tab-mark" class="tab-panel">
+          <div class="glass-card mark-control-bar">
+            <div class="control-grid">
+              <div class="form-group">
+                <label for="markDeptSelect">Department</label>
+                <select id="markDeptSelect" class="form-input">
+                  <option value="Computer Science">Computer Science</option>
+                  <option value="Information Technology">Information Technology</option>
+                  <option value="AI & Data Science">AI & Data Science</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="markSemSelect">Semester</label>
+                <select id="markSemSelect" class="form-input">
+                  <option value="Semester 6">Semester 6</option>
+                  <option value="Semester 4">Semester 4</option>
+                  <option value="Semester 2">Semester 2</option>
+                  <option value="Semester 8">Semester 8</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="markSubjectSelect">Course / Subject</label>
+                <select id="markSubjectSelect" class="form-input">
+                  <option value="Cloud Computing & DevOps">Cloud Computing & DevOps</option>
+                  <option value="Distributed Database Systems">Distributed Database Systems</option>
+                  <option value="Modern Web Frameworks">Modern Web Frameworks</option>
+                  <option value="Machine Learning Foundations">Machine Learning Foundations</option>
+                  <option value="Computer Networks & Security">Computer Networks & Security</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="markDateInput">Session Date</label>
+                <input type="date" id="markDateInput" class="form-input">
+              </div>
+
+              <div class="form-group">
+                <label for="markFacultyInput">Faculty / Proctor</label>
+                <input type="text" id="markFacultyInput" class="form-input" value="Dr. Sandeep Rao" placeholder="Faculty name">
+              </div>
+            </div>
+
+            <!-- Quick Batch Automation Bar -->
+            <div class="batch-action-bar">
+              <div class="batch-left">
+                <span class="session-summary-label">Batch Operations:</span>
+                <button type="button" id="btnMarkAllPresent" class="batch-btn success-btn">
+                  ✓ Mark All Present
+                </button>
+                <button type="button" id="btnMarkAllAbsent" class="batch-btn danger-btn">
+                  ✗ Mark All Absent
+                </button>
+                <button type="button" id="btnResetSession" class="batch-btn neutral-btn">
+                  ↺ Reset
+                </button>
+              </div>
+              <div class="batch-stats" id="sessionCounterStats">
+                <span class="stat-pill success">Present: <strong id="countPresent">0</strong></span>
+                <span class="stat-pill danger">Absent: <strong id="countAbsent">0</strong></span>
+                <span class="stat-pill warning">Late: <strong id="countLate">0</strong></span>
+                <span class="stat-pill purple">Excused: <strong id="countExcused">0</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Marking Roster Table -->
+          <div class="glass-card mt-4">
+            <div class="card-header-flex">
+              <div>
+                <h3 class="card-title">Student Attendance Sheet</h3>
+                <p class="card-desc" id="markingRosterSubtitle">Toggle status buttons for individual students</p>
+              </div>
+              <div class="search-box">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="markingSearchInput" placeholder="Quick search student or roll #...">
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="styled-table marking-table">
+                <thead>
+                  <tr>
+                    <th>Student Info</th>
+                    <th>Roll Number</th>
+                    <th>Historical %</th>
+                    <th class="text-center">Attendance Status Toggle</th>
+                    <th>Remarks / Excuse</th>
+                  </tr>
+                </thead>
+                <tbody id="markingTableBody">
+                  <!-- Dynamically rendered student rows with 4-way tactile toggles -->
+                </tbody>
+              </table>
+            </div>
+
+            <div class="roster-save-footer">
+              <div class="footer-sync-notice">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path></svg>
+                <span>Changes will be committed to the Cloud Database automatically upon save.</span>
+              </div>
+              <button id="btnCommitSession" class="primary-btn pulse-glow">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                <span>Save Session to Cloud</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 3: STUDENT DIRECTORY -->
+        <!-- ========================================== -->
+        <section id="tab-students" class="tab-panel">
+          <div class="glass-card">
+            <div class="card-header-flex flex-wrap-gap">
+              <div>
+                <h2 class="card-title">Enrolled Student Directory</h2>
+                <p class="card-desc">Manage student profiles, contact coordinates, academic compliance, and digital credentials.</p>
+              </div>
+              <div class="action-btn-group">
+                <button class="primary-btn" id="btnOpenAddStudentModal">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  <span>Enroll New Student</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Filters Bar -->
+            <div class="filter-toolbar">
+              <div class="search-box flex-grow">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="studentDirectorySearch" placeholder="Search by name, roll number, or email...">
+              </div>
+
+              <select id="studentDeptFilter" class="form-input select-filter">
+                <option value="ALL">All Departments</option>
+                <option value="Computer Science">Computer Science</option>
+                <option value="Information Technology">Information Technology</option>
+                <option value="AI & Data Science">AI & Data Science</option>
+              </select>
+
+              <select id="studentEligibilityFilter" class="form-input select-filter">
+                <option value="ALL">All Statuses</option>
+                <option value="ELIGIBLE">Eligible (≥ 75%)</option>
+                <option value="SHORTAGE">Shortage (&lt; 75%)</option>
+              </select>
+            </div>
+
+            <!-- Student Grid Cards / Table -->
+            <div class="table-responsive mt-3">
+              <table class="styled-table">
+                <thead>
+                  <tr>
+                    <th>Student ID / Name</th>
+                    <th>Roll Number</th>
+                    <th>Department</th>
+                    <th>Attendance Rate</th>
+                    <th>Classes Attended</th>
+                    <th>Academic Eligibility</th>
+                    <th class="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="studentDirectoryTableBody">
+                  <!-- Injected dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 4: ANALYTICS & REPORTS -->
+        <!-- ========================================== -->
+        <section id="tab-reports" class="tab-panel">
+          <div class="glass-card">
+            <div class="card-header-flex flex-wrap-gap">
+              <div>
+                <h2 class="card-title">Institutional Attendance Reports & Compliance</h2>
+                <p class="card-desc">Generate official attendance transcripts, export CSV logs, and filter session logs.</p>
+              </div>
+              <div class="action-btn-group">
+                <button class="action-btn secondary-btn" id="btnExportCSV">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  <span>Export to CSV</span>
+                </button>
+                <button class="action-btn secondary-btn" id="btnPrintReport">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                  <span>Print Formal Sheet</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Subject Performance Comparison Bar Chart -->
+            <div class="mt-4 mb-4">
+              <h3 class="subsection-title">Subject-Wise Attendance Comparison</h3>
+              <div class="canvas-wrapper-bar">
+                <canvas id="chartSubjectBreakdown"></canvas>
+              </div>
+            </div>
+
+            <!-- Historical Log Table -->
+            <div class="card-header-flex mt-4">
+              <h3 class="subsection-title mb-0">Historical Session Logs</h3>
+              <div class="filter-row">
+                <select id="reportSubjectFilter" class="form-input select-filter">
+                  <option value="ALL">All Subjects</option>
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+            </div>
+
+            <div class="table-responsive mt-2">
+              <table class="styled-table">
+                <thead>
+                  <tr>
+                    <th>Session ID</th>
+                    <th>Date</th>
+                    <th>Course Subject</th>
+                    <th>Department</th>
+                    <th>Present</th>
+                    <th>Absent</th>
+                    <th>Late / Excused</th>
+                    <th>Faculty</th>
+                    <th class="text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="reportSessionLogsBody">
+                  <!-- Injected dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 5: LEAVE REQUESTS -->
+        <!-- ========================================== -->
+        <section id="tab-leaves" class="tab-panel">
+          <div class="glass-card">
+            <div class="card-header-flex flex-wrap-gap">
+              <div>
+                <h2 class="card-title">Leave & On-Duty Approval Portal</h2>
+                <p class="card-desc">Review and authorize medical excuses, sports duties, and emergency leave requests.</p>
+              </div>
+              <button class="primary-btn" id="btnOpenNewLeaveModal">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>Submit Leave Request</span>
+              </button>
+            </div>
+
+            <div class="table-responsive mt-3">
+              <table class="styled-table">
+                <thead>
+                  <tr>
+                    <th>Leave ID</th>
+                    <th>Student Name</th>
+                    <th>Roll Number</th>
+                    <th>Reason / Grounds</th>
+                    <th>Date Range</th>
+                    <th>Current Status</th>
+                    <th class="text-right">Faculty Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="leaveRequestsTableBody">
+                  <!-- Injected dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 6: CLOUD & SETTINGS -->
+        <!-- ========================================== -->
+        <section id="tab-settings" class="tab-panel">
+          <div class="settings-grid">
+            <div class="glass-card">
+              <h3 class="card-title">Cloud Infrastructure & API Configuration</h3>
+              <p class="card-desc">Manage connection mode, simulated cloud latency, and REST API sync.</p>
+
+              <div class="form-group mt-3">
+                <label for="settingsStorageMode">Cloud Storage Pipeline</label>
+                <select id="settingsStorageMode" class="form-input">
+                  <option value="REST_AND_LOCAL">Hybrid Cloud (Local Cache + Node REST API Sync)</option>
+                  <option value="LOCAL_ONLY">Client-Side Offline Storage (LocalStorage Cache)</option>
+                </select>
+                <small class="form-help">Hybrid mode automatically commits changes to <code>cloud_db.json</code> via the Node server.</small>
+              </div>
+
+              <div class="form-group mt-3">
+                <label for="settingsApiUrl">Cloud REST Endpoint</label>
+                <input type="text" id="settingsApiUrl" class="form-input" value="http://localhost:3000/api">
+              </div>
+
+              <div class="cloud-telemetry-box mt-3">
+                <div class="telemetry-item">
+                  <span class="telemetry-title">Server Latency</span>
+                  <span class="telemetry-value" id="cloudLatencyBadge">14 ms (Optimal)</span>
+                </div>
+                <div class="telemetry-item">
+                  <span class="telemetry-title">Persistence Mechanism</span>
+                  <span class="telemetry-value">JSON Document Cloud DB</span>
+                </div>
+                <div class="telemetry-item">
+                  <span class="telemetry-title">Active Security Layer</span>
+                  <span class="telemetry-value text-success">SSL/TLS In-Transit Encryption</span>
+                </div>
+              </div>
+
+              <div class="mt-4">
+                <button id="btnTestCloudPing" class="action-btn secondary-btn">
+                  <span>⚡ Test Cloud Connection</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="glass-card">
+              <h3 class="card-title">Database Backup & Disaster Recovery</h3>
+              <p class="card-desc">Export institutional attendance data, seed demonstration records, or restore state.</p>
+
+              <div class="backup-actions-vertical mt-3">
+                <button id="btnExportJSON" class="action-btn full-width secondary-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  <span>Download Full Database Backup (JSON)</span>
+                </button>
+
+                <div class="file-upload-box">
+                  <label for="importDbInput" class="custom-file-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path></svg>
+                    <span>Restore / Upload Database JSON</span>
+                  </label>
+                  <input type="file" id="importDbInput" accept=".json" style="display: none;">
+                </div>
+
+                <button id="btnSeedDemoData" class="action-btn full-width warning-outline-btn">
+                  <span>✨ Reload Default Academic Sample Data</span>
+                </button>
+
+                <button id="btnWipeDatabase" class="action-btn full-width danger-outline-btn">
+                  <span>⚠️ Clear All Attendance Records</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- ========================================== -->
+    <!-- MODAL 1: ADD/EDIT STUDENT -->
+    <!-- ========================================== -->
+    <div id="studentModal" class="modal-backdrop">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 id="studentModalTitle" class="modal-title">Enroll New Student</h3>
+          <button class="modal-close-btn" onclick="App.closeModals()">&times;</button>
+        </div>
+        <form id="studentForm">
+          <div class="modal-body">
+            <input type="hidden" id="studentEditId">
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="studentNameInput">Full Name *</label>
+                <input type="text" id="studentNameInput" class="form-input" required placeholder="e.g. Aarav Sharma">
+              </div>
+              <div class="form-group flex-1">
+                <label for="studentRollInput">Roll Number / Student ID *</label>
+                <input type="text" id="studentRollInput" class="form-input" required placeholder="e.g. CS2026-015">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="studentDeptInput">Department</label>
+                <select id="studentDeptInput" class="form-input">
+                  <option value="Computer Science">Computer Science</option>
+                  <option value="Information Technology">Information Technology</option>
+                  <option value="AI & Data Science">AI & Data Science</option>
+                </select>
+              </div>
+              <div class="form-group flex-1">
+                <label for="studentSemInput">Semester</label>
+                <select id="studentSemInput" class="form-input">
+                  <option value="Semester 6">Semester 6</option>
+                  <option value="Semester 4">Semester 4</option>
+                  <option value="Semester 2">Semester 2</option>
+                  <option value="Semester 8">Semester 8</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="studentEmailInput">Institutional Email</label>
+                <input type="email" id="studentEmailInput" class="form-input" placeholder="student@cloudtech.edu">
+              </div>
+              <div class="form-group flex-1">
+                <label for="studentPhoneInput">Contact Phone</label>
+                <input type="tel" id="studentPhoneInput" class="form-input" placeholder="+91 98765 00000">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="action-btn secondary-btn" onclick="App.closeModals()">Cancel</button>
+            <button type="submit" class="primary-btn">Save Student Record</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL 2: STUDENT PROFILE & DIGITAL ID -->
+    <!-- ========================================== -->
+    <div id="profileModal" class="modal-backdrop">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 class="modal-title">Student Profile & Digital ID Badge</h3>
+          <button class="modal-close-btn" onclick="App.closeModals()">&times;</button>
+        </div>
+        <div class="modal-body" id="profileModalContent">
+          <!-- Dynamically injected student details & digital attendance card -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="action-btn secondary-btn" onclick="App.closeModals()">Close</button>
+          <button type="button" class="primary-btn" onclick="window.print()">Print ID Badge</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL 3: SUBMIT LEAVE REQUEST -->
+    <!-- ========================================== -->
+    <div id="leaveModal" class="modal-backdrop">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 class="modal-title">Submit Student Leave / Medical Duty</h3>
+          <button class="modal-close-btn" onclick="App.closeModals()">&times;</button>
+        </div>
+        <form id="leaveForm">
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="leaveStudentSelect">Select Student *</label>
+              <select id="leaveStudentSelect" class="form-input" required>
+                <!-- Filled dynamically -->
+              </select>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="leaveStartDate">Start Date *</label>
+                <input type="date" id="leaveStartDate" class="form-input" required>
+              </div>
+              <div class="form-group flex-1">
+                <label for="leaveEndDate">End Date *</label>
+                <input type="date" id="leaveEndDate" class="form-input" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="leaveReasonInput">Reason / Justification *</label>
+              <textarea id="leaveReasonInput" rows="3" class="form-input" required placeholder="Specify reason (Medical, Sports, Conference, Emergency)..."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="action-btn secondary-btn" onclick="App.closeModals()">Cancel</button>
+            <button type="submit" class="primary-btn">Submit Request</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Print-Only Official Attendance Summary Sheet -->
+    <div id="printableSheet" class="print-only">
+      <div class="print-header">
+        <h1>CloudTech Institute of Engineering & Technology</h1>
+        <h2>OFFICIAL ATTENDANCE COMPLIANCE & ELIGIBILITY TRANSCRIPT</h2>
+        <p id="printMetaDetails">Generated Date: 2026-10-24 | Academic Session: 2026-2027</p>
+      </div>
+      <table class="print-table" id="printTable">
+        <thead>
+          <tr>
+            <th>Roll No</th>
+            <th>Student Name</th>
+            <th>Department</th>
+            <th>Classes Held</th>
+            <th>Classes Attended</th>
+            <th>Attendance %</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="printTableBody">
+          <!-- Injected on demand before printing -->
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- Main Application Logic Script -->
+  <script src="app.js"></script>
+</body>
+</html>

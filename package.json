@@ -1,0 +1,19 @@
+{
+  "name": "cloud-student-attendance-system",
+  "version": "1.0.0",
+  "description": "A modern, cloud-enabled Student Attendance Management System with analytics, QR badges, and cloud sync.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "attendance-management",
+    "cloud-attendance",
+    "student-portal",
+    "education",
+    "analytics"
+  ],
+  "author": "Student Attendance Dev Team",
+  "license": "MIT"
+}
